@@ -1,7 +1,7 @@
 # RV32I Single-Cycle Implementation
 
 ## Overview
-This project implements a single-cycle datapath for the RV32I architecture, specifically designed for an alarm clock system. The implementation features instruction fetching, execution, and data memory operations, along with LED and 7-segment display outputs.
+This project implements a single-cycle datapath for the RV32I architecture, supporting all instructions. The implementation features instruction fetching, execution, and data memory operations, along with LED and 7-segment display outputs.
 
 ## Authors
 - **Aly Elaswad** (alyelaswad@aucegypt.edu)
