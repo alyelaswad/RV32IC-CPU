@@ -8,8 +8,8 @@ This project implements a single-cycle datapath for the RV32I architecture, supp
 - **Ismail Sabry** (ismailsabry@aucegypt.edu)
 
 
-### Change History
-
+### What Works?
+All RV32I instructions are supported, we may have to revisit the implementation of LB, LH, SH, and SB later in MS3
 ## Module Description
 ### Inputs
 - `clk`: Clock signal.
