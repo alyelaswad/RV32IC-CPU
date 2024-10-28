@@ -1,22 +1,14 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 09/24/2024 04:33:20 PM
-// Design Name: 
-// Module Name: ALUCU
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+
+/*******************************************************************
+*
+* Module: ALUCU.v
+* Project: Single Cycle RISC-V Processor
+* Author:
+          Aly    alyelaswad@aucegypt.edu
+          Ismail ismailsabry@aucegypt.edu
+* Description: This module is the ALU of the processor. It performs the arithmetic and logical operations on the inputs A and B according to the control signals.
+**********************************************************************/
 `define     ALU_ADD         4'b0010 
 `define     ALU_SUB         4'b0110 
 `define     ALU_PASS        4'b00_11 

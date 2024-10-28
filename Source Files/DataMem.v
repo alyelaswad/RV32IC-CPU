@@ -39,7 +39,7 @@ for(i=0;i<63;i=i+1) begin
 mem[i]=0;
 end
 end
-else if(MemWrite==1'b1)begin
+else if(MemWrite==1'b1)begin // Logic for writing to memory
 if(funct3==3'b010)
 mem[addr]=data_in;
 else if (funct3==3'b001)

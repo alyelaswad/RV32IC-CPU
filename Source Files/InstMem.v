@@ -22,7 +22,7 @@
 
 module InstMem (input [5:0] addr, output [31:0] data_out);
 reg [31:0] mem [0:63];
-initial begin
+initial begin // Test Program
 mem[0] = 32'b00000001010000000000010100010011;
 mem[1] = 32'b11111110110000000000010110010011;
 mem[2] = 32'b00000010101101010000000001100011;

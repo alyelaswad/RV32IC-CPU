@@ -2,55 +2,51 @@
 /*******************************************************************
 *
 * Module: Datapath.v
-* Project: Alarm_Clock
-* Author: Islam  islamemara@aucegypt.edu
+* Project: Single Cycle RISC-V Processor
+* Author:
           Aly    alyelaswad@aucegypt.edu
           Ismail ismailsabry@aucegypt.edu
-* Description: The module that outputs the count for the alarm, count for the clock, the LED signals and the buzzer signal
-*
-* Change history: 05/13/24 - Built the module and added the hour units and counter hour tens counter
-*                 05/15/24 - Adjusted the states logic by using 5 states (the states: clock, time hour, time minute, alarm hour, and the alarm minute),
-                  added the alarm counters, adjusted different clocks and added a MUX for the alarm and clock count.    
-*                 05/16/24 - Fixed major errors in the buzzer, fixed errors in the decimal point, added the alarm state to disable the alarm upon pressing any button  
+* Description: This module is the top level module of the processor. It instantiates all the other modules and connects them together. It also contains the control logic for the processor.
+*  
 **********************************************************************/
 
 
 module Datapath(input clk, input rst, input [1:0] ledsel,input [3:0] ssdSel,input ssdClk,  output reg [15:0]leds, output reg [3:0]  Anode,output reg [6:0] ssd_out);
-reg [13:0]ssd;
-wire outC;
-wire outR;
-wire clk_buttons;
-wire [31:0] pcout;
-reg [31:0] pcinp;
-wire [31:0] ReadData1;
-wire [31:0] ReadData2;
-wire [31:0] WrData;
-wire [31:0] pc4;
-wire [31:0] outputinst;
-wire [1:0] ALUOp;
-wire Branch,MemRead,MemtoReg,MemWrite, ALUSrc, RegWrite;
-wire [31:0] immout;
-wire [31:0] pcimm;
-reg ANDout;
-wire [31:0] ALUinp2;
-wire [3:0] ALUsel;
-wire [31:0] ALUout;
-wire Z;
-wire C;
-wire N;
-wire V;
-wire [31:0] data_out;
-wire [15:0] signals;
-reg [3:0] LED_BCD;
+reg [13:0]ssd; // 14-bit register for the 7-segment display
+wire outC; // The clock signal for the pushbuttons
+wire outR; // The reset signal for the pushbuttons
+wire clk_buttons; // The clock signal for the pushbuttons
+wire [31:0] pcout; // The output of the program counter
+reg [31:0] pcinp; // The input of the program counter
+wire [31:0] ReadData1; // The output of the first register file read port
+wire [31:0] ReadData2; // The output of the second register file read port
+wire [31:0] WrData;    // The input of the register file write port
+wire [31:0] pc4; // The program counter incremented by 4
+wire [31:0] outputinst; // The output of the instruction memory
+wire [1:0] ALUOp; // The ALU operation
+wire Branch,MemRead,MemtoReg,MemWrite, ALUSrc, RegWrite; // The control signals
+wire [31:0] immout; // The output of the immediate generator
+wire [31:0] pcimm; // The immediate added to the program counter
+reg ANDout; // The output of the AND gate
+wire [31:0] ALUinp2; // The second input of the ALU
+wire [3:0] ALUsel; // The ALU operation
+wire [31:0] ALUout; // The output of the ALU
+wire Z; // The zero flag
+wire C; // The carry flag
+wire N; // The negative flag
+wire V; // The overflow flag
+wire [31:0] data_out; // The output of the data memory
+wire [15:0] signals; // The signals to be displayed on the LEDs
+reg [3:0] LED_BCD;  // The BCD representation of the number to be displayed on the 7-segment display
 reg [19:0] refresh_counter = 0; // 20-bit counter
-wire [1:0] LED_activating_counter;
+wire [1:0] LED_activating_counter; // The 2-bit counter for the 7-segment display
 
 //clockDivider #(500000)div2(ssdClk,1'd0, clk_buttons); // The clockdivider for the clock of the pushbuttons 
 //pushButtonDetector clky (clk_buttons,rst, clk , outC); // The clk
 //pushButtonDetector rsty(clk_buttons,0, rst, outR);  // The rst
 
 
-always @(ssdClk|| rst) begin
+always @(ssdClk|| rst) begin  
         if (rst) begin  
             pcinp <= 32'd0;  // Set pcinp to zero on reset
             end
@@ -60,34 +56,34 @@ if(!(outputinst[6:0]==7'b1110011))
             
        
     end
-Nbitreg #(32) nbitregya(ssdClk,1'b1,rst,pcinp,pcout);
+Nbitreg #(32) nbitregya(ssdClk,1'b1,rst,pcinp,pcout); // The program counter register
 
-InstMem instmemya(pcout[7:2],outputinst);
+InstMem instmemya(pcout[7:2],outputinst); // The instruction memory
 
-assign pc4 = pcout+4;
-
-
-CU cuy(outputinst[6:2],Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite, ALUOp,Jal,Jalr,Lui,Auipc);
-
-RF #(32) rfya(outputinst[19:15],outputinst[24:20],outputinst[11:7],WrData,RegWrite,ssdClk,rst, ReadData1,ReadData2);
+assign pc4 = pcout+4; // The program counter incremented by 4
 
 
-ImmGenen ig( immout,outputinst);
+CU cuy(outputinst[6:2],Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite, ALUOp,Jal,Jalr,Lui,Auipc); // The control unit
+
+RF #(32) rfya(outputinst[19:15],outputinst[24:20],outputinst[11:7],WrData,RegWrite,ssdClk,rst, ReadData1,ReadData2); // The register file
 
 
-
-assign pcimm = pcout + immout;
-
-
-assign ALUinp2 =(ALUSrc) ? immout : ReadData2;
-
-
-ALUCU ALUCUhaya(outputinst[14:12] ,outputinst[30], ALUOp,ALUsel);
+ImmGenen ig( immout,outputinst); // The immediate generator
 
 
 
+assign pcimm = pcout + immout; // The immediate added to the program counter
 
-NbitALU #(32) ALUhya(ReadData1, ALUinp2, ALUsel,ALUout,Z,N,V,C);
+
+assign ALUinp2 =(ALUSrc) ? immout : ReadData2; // The second input of the ALU
+
+
+ALUCU ALUCUhaya(outputinst[14:12] ,outputinst[30], ALUOp,ALUsel); // The ALU control unit
+
+
+
+
+NbitALU #(32) ALUhya(ReadData1, ALUinp2, ALUsel,ALUout,Z,N,V,C); // The ALU
 always @(*)begin
 if (Branch) begin
 case (funct3)
@@ -102,31 +98,21 @@ end
 else 
 ANDout=1'b0;
 end
-//assign ANDout = (Z&&Branch);
 
-
-//always @(*) begin
-//if(MemWrite)
-//begin
-//if(inst[14:12]==3'b000)
-//begin
-//end
-//end
-
-wire [2:0] funct3;
+wire [2:0] funct3; // The funct3 field of the instruction
 assign funct3=outputinst[14:12];
-DataMem datamemaya(ssdClk,  MemRead, MemWrite, ALUout[7:2], ReadData2,  data_out,funct3,rst);
+DataMem datamemaya(ssdClk,  MemRead, MemWrite, ALUout[7:2], ReadData2,  data_out,funct3,rst); // The data memory
 wire [31:0] dOutaddresable;
 assign dOutaddresable = 
     (outputinst[14:12] == 3'b000) ? {{24{data_out[7]}}, data_out[7:0]} :
     (outputinst[14:12] == 3'b001) ? {{16{data_out[15]}}, data_out[15:0]} :
     (outputinst[14:12] == 3'b010) ? data_out :
-    (outputinst[14:12] == 3'b100) ? {24'd0, data_out[7:0]} :{16'd0, data_out[15:0]};
+    (outputinst[14:12] == 3'b100) ? {24'd0, data_out[7:0]} :{16'd0, data_out[15:0]}; // The data memory output in the addressable format
 
-assign WrData = (MemtoReg) ? dOutaddresable:(Jal||Jalr)? pc4:(Lui)? immout:(Auipc)? (pcout+immout): ALUout;
+assign WrData = (MemtoReg) ? dOutaddresable:(Jal||Jalr)? pc4:(Lui)? immout:(Auipc)? (pcout+immout): ALUout; // The input of the register file write port
 
 
-assign signals={2'b00,ALUOp,ALUsel,Z,ANDout,Branch,MemRead,MemtoReg,MemWrite, ALUSrc, RegWrite};
+assign signals={2'b00,ALUOp,ALUsel,Z,ANDout,Branch,MemRead,MemtoReg,MemWrite, ALUSrc, RegWrite}; // The signals to be displayed on the LEDs
 always @(*) begin
 case(ledsel)
 2'b00: leds=outputinst[15:0];
