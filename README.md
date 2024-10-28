@@ -7,8 +7,6 @@ This project implements a single-cycle datapath for the RV32I architecture, supp
 - **Aly Elaswad** (alyelaswad@aucegypt.edu)
 - **Ismail Sabry** (ismailsabry@aucegypt.edu)
 
-## File: Datapath.v
-The main module that manages the count for the alarm, clock, LED signals, and buzzer signal.
 
 ### Change History
 
