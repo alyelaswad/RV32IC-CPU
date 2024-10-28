@@ -4,8 +4,8 @@
 This project implements a single-cycle datapath for the RV32I architecture, specifically designed for an alarm clock system. The implementation features instruction fetching, execution, and data memory operations, along with LED and 7-segment display outputs.
 
 ## Authors
-- **Aly** (alyelaswad@aucegypt.edu)
-- **Ismail** (ismailsabry@aucegypt.edu)
+- **Aly Elaswad** (alyelaswad@aucegypt.edu)
+- **Ismail Sabry** (ismailsabry@aucegypt.edu)
 
 ## File: Datapath.v
 The main module that manages the count for the alarm, clock, LED signals, and buzzer signal.
