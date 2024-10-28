@@ -11,9 +11,6 @@ This project implements a single-cycle datapath for the RV32I architecture, spec
 The main module that manages the count for the alarm, clock, LED signals, and buzzer signal.
 
 ### Change History
-- **05/13/24** - Initial module built, incorporating hour units and counters.
-- **05/15/24** - Enhanced state logic with five distinct states: clock, time hour, time minute, alarm hour, and alarm minute. Added alarm counters and a multiplexer (MUX) for clock/alarm counts.
-- **05/16/24** - Resolved issues with the buzzer and decimal point representation; implemented alarm disable functionality via button presses.
 
 ## Module Description
 ### Inputs
