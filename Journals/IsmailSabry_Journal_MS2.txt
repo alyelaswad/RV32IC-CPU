@@ -1,0 +1,7 @@
+Oct 24, 3:30PM:  Created Datapath supoporting ALL instructions
+                 Finalized IMM GEN (I,LUI,AUIPC,B,NO-OP,EBREAK)
+                 Control Signals of of all except signals for AUIPC and LUI
+Oct 27, 11:30AM: Developed ALU Control Unit with signals for ALU
+                 Developed ALU to collobrate wirh ALU control unir
+                 Tested ALU and ALU Control Unit
+Oct 28, 3:30PM: Tested Branch & U type instructions            

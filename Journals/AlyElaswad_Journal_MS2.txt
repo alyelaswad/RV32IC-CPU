@@ -1,0 +1,8 @@
+Oct 24, 3:30PM: Finalized the immediate generator of the J type
+                Developed support for ecall that end the program
+                Developed control signals for AUIPC and LUI
+Oct 27, 11:30AM: Supported the LB,LBU,LH,LHU instructions in the data memory
+                 Supported the SH,SB instructions
+                 Added the new multiplexers and support the changes in the new datapath
+                 Tested R-type and JAL instructions
+Oct 28, 3:30PM:  Tested the store,load, and I type instructions
