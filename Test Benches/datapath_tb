@@ -1,0 +1,29 @@
+
+module datapath_tb();
+reg clk; reg rst; reg [1:0] ledsel; reg [3:0] ssdSel; reg ssdClk;  wire [15:0]leds; wire [3:0] Anode; wire [6:0] ssd_out;
+
+localparam period=10;
+Datapath datapathaya( clk, rst,  ledsel, ssdSel, ssdClk, leds, Anode, ssd_out);
+
+initial begin
+ssdClk=0;
+forever #(period/10) ssdClk=~ssdClk;
+end 
+
+initial begin
+clk=0;
+forever #(period/8.12) clk=~clk;
+end
+
+initial begin
+rst=1;
+
+#period
+rst=0;
+ledsel =2'b00;
+ssdSel =4'b0000;
+#200
+$finish;
+
+end
+endmodule
