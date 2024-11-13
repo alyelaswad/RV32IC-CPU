@@ -1,0 +1,10 @@
+Nov 7, 3:30PM:  Adapted the forwarding unit to handle our changes in the clock cycle that
+                would have came up after making it single memory
+                Fixed some errors in flushing the instructions.  
+Nov 10, 11:30AM: Made the memory byte addressable and handled it accordingly to support
+                 the SB,SH instructions and the LB,LH,LBU,LHU instructions.
+                 Supported all the branch instructions (BNE, BLT, BGE, BLTU, BGEU)
+Nov 11, 3:30PM:  Made the processor single memory so that both the instructions and the data are   
+                 passed through the same port.
+Nov 12, 8:30PM:  Made the data to be read from a text file and populated in mem
+                 Implemented the Python Test Generator as one of our bonuses

@@ -1,0 +1,14 @@
+Nov 7, 3:30PM:    Designed the Datapath for the pipelined RISCV without (JALR,JAL,JALR,AUIPC, LUI)  
+                  Adjusted Shift operations in I Type
+                  Helped in fixing the forwarding unit
+
+Nov 10, 8:00 PM:  Integrated the rest of the instructions from the last project (ALU CU, CU,IMM gen) to work on all instructions without                              
+                            JAL,JALR,AUIPC, LUI instructions 
+                  Tested all the instructions before adding the single memory
+
+Nov 11, 12:45PM:  Designed the Single Memory Pipelined Datapath with  JAL,JALR,AUIPC, LUI instructions 
+                  Adjusted the Write data mux and the PC mux, and stages to work from signals on  JAL,JALR,AUIPC, LUI instructions
+
+Nov 12, 3:30PM:   Tested different usecases that includes all instructions.
+
+Nov 13, 12:45PM:   Fixed issue with branch flags
