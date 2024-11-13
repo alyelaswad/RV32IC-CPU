@@ -1,156 +1,144 @@
 import random
 
-# Define registers and immediate range
-registers = [f"x{i}" for i in range(1, 32)]  # Exclude x0 as it's hard-wired to 0
-register_codes = {f"x{i}": i for i in range(32)}
-immediate_range = range(-2048, 2047)
 
-# RISC-V Instruction opcodes and funct codes
+registers = [f"x{i}" for i in range(32)]
+register_codes = {f"x{i}": i for i in range(32)}
+
+
 R_TYPE_INSTRUCTIONS = {
     "add": (0b0110011, 0b000, 0b0000000),
     "sub": (0b0110011, 0b000, 0b0100000),
     "xor": (0b0110011, 0b100, 0b0000000),
     "or": (0b0110011, 0b110, 0b0000000),
-    "and": (0b0110011, 0b111, 0b0000000)
+    "and": (0b0110011, 0b111, 0b0000000),
+    "sll": (0b0110011, 0b001, 0b0000000),
+    "srl": (0b0110011, 0b101, 0b0000000),
+    "sra": (0b0110011, 0b101, 0b0100000),
+    "slt": (0b0110011, 0b010, 0b0000000),
+    "sltu": (0b0110011, 0b011, 0b0000000),
 }
 
 I_TYPE_INSTRUCTIONS = {
-    "addi": (0b0010011, 0b000),
-    "xori": (0b0010011, 0b100),
-    "ori": (0b0010011, 0b110),
-    "andi": (0b0010011, 0b111)
-}
-
-S_TYPE_INSTRUCTIONS = {
-    "sb": (0b0100011, 0b000),
-    "sh": (0b0100011, 0b001),
-    "sw": (0b0100011, 0b010)
+    "lw": 0b0000011,
+    "sw": 0b0100011,
+    "addi": 0b0010011,
+    "xori": 0b0010011,
+    "andi": 0b0010011,
+    "ori": 0b0010011,
+    "slti": 0b0010011,
+    "jalr": 0b1100111,
 }
 
 B_TYPE_INSTRUCTIONS = {
-    "beq": (0b1100011, 0b000),
-    "bne": (0b1100011, 0b001)
+    "beq": 0b1100011,
+    "bne": 0b1100011,
+    "blt": 0b1100011,
+    "bge": 0b1100011,
 }
 
+J_TYPE_INSTRUCTIONS = {
+    "jal": 0b1101111,
+}
 
-# Helper to format in hexadecimal
-def to_hex(val, bits=32):
-    return f"{val & ((1 << bits) - 1):08x}"
+U_TYPE_INSTRUCTIONS = {
+    "lui": 0b0110111,
+    "auipc": 0b0010111,
+}
 
+def generate_r_type_instruction(opcode, func3, func7, rd, rs1, rs2):
 
-# R-type encoding
-def encode_r_type(inst, rd, rs1, rs2):
-    opcode, funct3, funct7 = R_TYPE_INSTRUCTIONS[inst]
-    rd_code = register_codes[rd]
-    rs1_code = register_codes[rs1]
-    rs2_code = register_codes[rs2]
-    return (funct7 << 25) | (rs2_code << 20) | (rs1_code << 15) | (funct3 << 12) | (rd_code << 7) | opcode
+    return (func7 << 25) | (register_codes[rs2] << 20) | (register_codes[rs1] << 15) | \
+           (register_codes[rd] << 7) | (func3 << 12) | (opcode << 0)
 
+def generate_i_type_instruction(opcode, func3, imm, rd, rs1):
 
-# I-type encoding
-def encode_i_type(inst, rd, rs1, imm):
-    opcode, funct3 = I_TYPE_INSTRUCTIONS[inst]
-    rd_code = register_codes[rd]
-    rs1_code = register_codes[rs1]
-    imm = imm & 0xFFF  # 12-bit immediate
-    return (imm << 20) | (rs1_code << 15) | (funct3 << 12) | (rd_code << 7) | opcode
+    return (imm & 0xFFF) | (register_codes[rs1] << 15) | (register_codes[rd] << 7) | \
+           (func3 << 12) | (opcode << 0)
 
+def generate_b_type_instruction(opcode, func3, imm, rs1, rs2):
 
-# S-type encoding
-def encode_s_type(inst, rs1, rs2, imm):
-    opcode, funct3 = S_TYPE_INSTRUCTIONS[inst]
-    rs1_code = register_codes[rs1]
-    rs2_code = register_codes[rs2]
-    imm_low = imm & 0x1F
-    imm_high = (imm >> 5) & 0x7F
-    return (imm_high << 25) | (rs2_code << 20) | (rs1_code << 15) | (funct3 << 12) | (imm_low << 7) | opcode
+    imm12 = (imm >> 12) & 0x1
+    imm10_5 = (imm >> 5) & 0x3F
+    imm4_1 = (imm >> 1) & 0xF
+    imm11 = (imm >> 11) & 0x1
+    return (imm12 << 31) | (imm11 << 7) | (imm10_5 << 25) | (register_codes[rs2] << 20) | \
+           (register_codes[rs1] << 15) | (func3 << 12) | (opcode << 0)
 
+def generate_j_type_instruction(opcode, imm, rd):
 
-# B-type encoding
-def encode_b_type(inst, rs1, rs2, imm):
-    opcode, funct3 = B_TYPE_INSTRUCTIONS[inst]
-    rs1_code = register_codes[rs1]
-    rs2_code = register_codes[rs2]
-    imm = imm & 0x1FFF
-    imm_11 = (imm >> 11) & 0x1
-    imm_4_1 = (imm >> 1) & 0xF
-    imm_10_5 = (imm >> 5) & 0x3F
-    imm_12 = (imm >> 12) & 0x1
-    return (imm_12 << 31) | (imm_10_5 << 25) | (rs2_code << 20) | (rs1_code << 15) | (funct3 << 12) | (imm_4_1 << 8) | (
-                imm_11 << 7) | opcode
+    imm20 = (imm >> 20) & 0x1
+    imm10_1 = (imm >> 1) & 0x3FF
+    imm11 = (imm >> 11) & 0x1
+    imm19_12 = (imm >> 12) & 0xFF
+    return (imm20 << 31) | (imm19_12 << 12) | (imm11 << 20) | (imm10_1 << 1) | \
+           (register_codes[rd] << 7) | (opcode << 0)
 
+def generate_instruction():
 
-# Generate initial register values
-def initialize_registers(num_init=5):
-    init_instructions = []
-    initialized_regs = []
-    for _ in range(num_init):
+    instruction_type = random.choice(["R", "I", "S", "B", "U", "J"])
+
+    if instruction_type == "R":
+        func3, func7 = random.choice(list(R_TYPE_INSTRUCTIONS.values()))[1:3]
         rd = random.choice(registers)
-        imm = random.randint(-2048, 2047)
-        encoded = encode_i_type("addi", rd, "x0", imm)
-        init_instructions.append(to_hex(encoded))
-        initialized_regs.append(rd)
-    return init_instructions, initialized_regs
+        rs1 = random.choice(registers)
+        rs2 = random.choice(registers)
+        opcode = 0b0110011  # R-type opcode
+        return generate_r_type_instruction(opcode, func3, func7, rd, rs1, rs2)
+
+    elif instruction_type == "I":
+        instr = random.choice(list(I_TYPE_INSTRUCTIONS.keys()))
+        imm = random.randint(-128, 127)
+        rs1 = random.choice(registers)
+        rd = random.choice(registers)
+        opcode = I_TYPE_INSTRUCTIONS[instr]
+        func3 = 0b000
+        return generate_i_type_instruction(opcode, func3, imm, rd, rs1)
+
+    elif instruction_type == "S":
+        instr = random.choice(list(I_TYPE_INSTRUCTIONS.keys()))
+        imm = random.randint(-128, 127)
+        rs1 = random.choice(registers)
+        rs2 = random.choice(registers)
+        opcode = I_TYPE_INSTRUCTIONS[instr]
+        func3 = 0b010
+        return generate_i_type_instruction(opcode, func3, imm, rs1, rs2)
+
+    elif instruction_type == "B":
+        instr = random.choice(list(B_TYPE_INSTRUCTIONS.keys()))
+        imm = random.randint(-32, 32) * 2
+        rs1 = random.choice(registers)
+        rs2 = random.choice(registers)
+        opcode = B_TYPE_INSTRUCTIONS[instr]
+        func3 = 0b000
+        return generate_b_type_instruction(opcode, func3, imm, rs1, rs2)
+
+    elif instruction_type == "U":
+        instr = random.choice(list(U_TYPE_INSTRUCTIONS.keys()))
+        imm = random.randint(0, 0xFFFFF)
+        rd = random.choice(registers)
+        opcode = U_TYPE_INSTRUCTIONS[instr]
+        return generate_i_type_instruction(opcode, 0b000, imm, rd, "x0")  # U-type doesn't need rs1
+
+    elif instruction_type == "J":
+        instr = random.choice(list(J_TYPE_INSTRUCTIONS.keys()))
+        imm = random.randint(-32, 32) * 2
+        rd = random.choice(registers)
+        opcode = J_TYPE_INSTRUCTIONS[instr]
+        return generate_j_type_instruction(opcode, imm, rd)
+
+def generate_instructions(n):
+
+    instructions = []
+    for _ in range(n):
+        instructions.append(generate_instruction())
+    return instructions
+
+def write_hex_file(instructions, filename="instructions.hex"):
+
+    with open(filename, "w") as f:
+        for instr in instructions:
+            f.write(f"{instr:08x}\n")
 
 
-# Generate random R-type instruction
-def generate_r_type(initialized_regs):
-    inst = random.choice(list(R_TYPE_INSTRUCTIONS.keys()))
-    rd, rs1, rs2 = random.sample(initialized_regs, 3)
-    encoded = encode_r_type(inst, rd, rs1, rs2)
-    return to_hex(encoded)
-
-
-# Generate random I-type instruction
-def generate_i_type(initialized_regs):
-    inst = random.choice(list(I_TYPE_INSTRUCTIONS.keys()))
-    rd, rs1 = random.sample(initialized_regs, 2)
-    imm = random.randint(-2048, 2047)
-    encoded = encode_i_type(inst, rd, rs1, imm)
-    return to_hex(encoded)
-
-
-# Generate random S-type instruction
-def generate_s_type(initialized_regs):
-    inst = random.choice(list(S_TYPE_INSTRUCTIONS.keys()))
-    rs1, rs2 = random.sample(initialized_regs, 2)
-    imm = random.randint(-2048, 2047)
-    encoded = encode_s_type(inst, rs1, rs2, imm)
-    return to_hex(encoded)
-
-
-# Generate random B-type instruction
-def generate_b_type(initialized_regs):
-    inst = random.choice(list(B_TYPE_INSTRUCTIONS.keys()))
-    rs1, rs2 = random.sample(initialized_regs, 2)
-    imm = random.randint(-2048, 2047) & ~1  # Ensure imm is even for B-type
-    encoded = encode_b_type(inst, rs1, rs2, imm)
-    return to_hex(encoded)
-
-
-# Main function to generate a test program with initialized registers
-def generate_test_program(num_instructions=10):
-    program = []
-    init_instructions, initialized_regs = initialize_registers()
-    program.extend(init_instructions)  # Add initialization instructions
-
-    # Generate remaining instructions using initialized registers
-    for _ in range(num_instructions):
-        inst_type = random.choice(["R", "I", "S", "B"])
-        if inst_type == "R":
-            hex_inst = generate_r_type(initialized_regs)
-        elif inst_type == "I":
-            hex_inst = generate_i_type(initialized_regs)
-        elif inst_type == "S":
-            hex_inst = generate_s_type(initialized_regs)
-        elif inst_type == "B":
-            hex_inst = generate_b_type(initialized_regs)
-        program.append(hex_inst)
-    return program
-
-
-# Generate and print a sample test program in hex only
-if __name__ == "__main__":
-    test_program = generate_test_program(10)
-    for hex_inst in test_program:
-        print(hex_inst)
+instructions = generate_instructions(32)
+write_hex_file(instructions)
