@@ -8,8 +8,8 @@ This project implements a pipeline datapath for the RV32I architecture, supporti
 - **Ismail Sabry** (ismailsabry@aucegypt.edu)
 
 
-### What Works?
-All RV32I instructions are supported.
+### What Works and how to use?
+All RV32I instructions are supported. In the memory you should enter the path of instructions as a hex file format (.hex). You could also add memory values if you like but you have to hard code it. 
 ## Module Description
 ### Inputs
 - `ssdclk`: Clock signal.
