@@ -1,7 +1,7 @@
-# RV32I Single-Cycle Implementation
+# RV32I PipeLine Implementation
 
 ## Overview
-This project implements a single-cycle datapath for the RV32I architecture, supporting all instructions. The implementation features instruction fetching, execution, and data memory operations, along with LED and 7-segment display outputs.
+This project implements a pipeline datapath for the RV32I architecture, supporting all instructions. NEXYS NOT SUPPORTED
 
 ## Authors
 - **Aly Elaswad** (alyelaswad@aucegypt.edu)
@@ -9,25 +9,18 @@ This project implements a single-cycle datapath for the RV32I architecture, supp
 
 
 ### What Works?
-All RV32I instructions are supported, we may have to revisit the implementation of LB, LH, SH, and SB later in MS3
+All RV32I instructions are supported.
 ## Module Description
 ### Inputs
-- `clk`: Clock signal.
+- `ssdclk`: Clock signal.
 - `rst`: Reset signal.
-- `ledsel`: Selector for LED outputs.
-- `ssdSel`: Selector for 7-segment display outputs.
-- `ssdClk`: Clock for the 7-segment display.
 
-### Outputs
-- `leds`: Output signals for LEDs.
-- `Anode`: Anode control signals for the 7-segment display.
-- `ssd_out`: Output for the 7-segment display.
 
 ### Internal Signals
 The module contains various internal signals for:
 - Instruction processing.
 - ALU operations.
-- Data memory interactions.
+- Control Unit.
 
 ## Functionality
 ### Datapath Components
@@ -39,17 +32,12 @@ The module contains various internal signals for:
 - **ALU (Arithmetic Logic Unit)**: Executes arithmetic and logical operations based on control signals.
 - **Data Memory**: Handles data read/write operations.
 
-### LED Display Management
-The module controls a 7-segment display to show selected data, with the display updating based on input selection.
-
-### Clock and Button Handling
-Clock signals for button interactions and display refreshing are managed through dedicated clock dividers and push button detectors.
 
 ## Coding Structure
 The main logic is organized in always blocks, combinational logic, and instantiations of other modules, including:
 - **N-bit registers** for holding values.
 - **Control units** for generating necessary signals.
-- **ALU and data memory** modules for execution and data handling.
+- **ALU and  Memory** modules for execution and single memory handling.
 
 ### Example Instantiation
 ```verilog
